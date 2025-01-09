@@ -1,23 +1,21 @@
 #!/bin/bash
 
-# בדיקת פרמטרים
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 2 ]; then #check paramters
     echo "Usage: $0 <TASKID> <Appended_Dev_Message>"
     exit 1
 fi
 
-# פרמטרים
 TASKID=$1
 APPENDED_DEV_MSG=$2
-CSV_FILE="task.csv"  # שם הקובץ הקבוע
+CSV_FILE="task.csv" 
 
-# בדיקת קיום הקובץ
+#check if the csv exist
 if [ ! -f "$CSV_FILE" ]; then
     echo "Error: File $CSV_FILE does not exist."
     exit 1
 fi
 
-# חיפוש המשימה ב-CSV
+#search the mission in the csv
 FOUND=false
 while IFS=',' read -r CSV_TASKID DESC BRANCH DEVELOPER GITHUB_URL; do
     if [ "$CSV_TASKID" == "$TASKID" ]; then
@@ -25,14 +23,14 @@ while IFS=',' read -r CSV_TASKID DESC BRANCH DEVELOPER GITHUB_URL; do
         CURRENT_DATETIME=$(date '+%Y-%m-%d %H:%M:%S')
         COMMIT_MSG="$TASKID – $CURRENT_DATETIME – $BRANCH – $DEVELOPER – $DESC – $APPENDED_DEV_MSG"
 
-        # בדיקה או יצירת branch
+        #branch
         git checkout "$BRANCH" || git checkout -b "$BRANCH"
 
-        # ביצוע Commit
+        #Commit
         git add .
         git commit -m "$COMMIT_MSG"
 
-        # ביצוע Push
+        #Push to github read me
         git push -u "$GITHUB_URL" "$BRANCH"
         if [ $? -eq 0 ]; then
             echo "Commit and push succeeded for TaskID $TASKID."
